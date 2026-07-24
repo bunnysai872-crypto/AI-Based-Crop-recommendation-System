@@ -1,0 +1,80 @@
+{
+  "water": "నీటి అవసరం",
+  "marketDemand": "మార్కెట్ డిమాండ్",
+  "season": "పంట కాలం",
+  "durationLabel": "వ్యవధి",
+  "consequences": "పరిణామాలు",
+
+  "location": "ప్రాంతం",
+  "soilType": "నేల రకం",
+  "temperature": "ఉష్ణోగ్రత",
+  "profit": "లాభం",
+
+  "medium": "మధ్యస్థం",
+  "high": "ఎక్కువ",
+  "kharif": "ఖరీఫ్",
+  "duration": "90-120 రోజులు",
+
+  "heavyRain": "భారీ వర్షం",
+  "drought": "కరువు",
+
+  "profitValue": "₹2.4 లక్షలు",
+  "fertilizer": "ఎన్‌పీకే + యూరియా",
+  "farming": "డ్రిప్ ఇరిగేషన్",
+  "states": "తెలంగాణ, ఆంధ్రప్రదేశ్, కర్ణాటక",
+  "marketPrice": "₹2300/క్వింటాల్",
+  "Black Soil":"నల్ల నేల",
+"Red Soil":"ఎర్ర నేల",
+"Alluvial Soil":"అల్యూవియల్ నేల",
+"Clay Soil":"మట్టి నేల",
+"Sandy Soil":"ఇసుక నేల",
+"Loamy Soil":"లోమీ నేల",
+"Laterite Soil":"లేటరైట్ నేల",
+"Peaty Soil":"పీట్ నేల",
+  "login": "లాగిన్",
+  "register": "నమోదు చేయండి",
+  "email": "ఇమెయిల్",
+  "password": "పాస్వర్డ్",
+"fullName": "పూర్తి పేరు",
+
+
+  "confidence": "AI నమ్మక స్థాయి",
+  "top3Recommendations": "మొదటి 3 పంట సిఫార్సులు",
+  "recommendedCrop": "సిఫార్సు చేసిన పంట",
+  "recommendationReason": "ఈ పంటను ఎందుకు సూచించాం?",
+  "suitableSoil": "తగిన నేల pH",
+  "favorableTemperature": "అనుకూల ఉష్ణోగ్రత",
+  "goodHumidity": "తగిన తేమ",
+  "adequateRainfall": "సరిపడే వర్షపాతం",
+  "balancedNPK": "సమతుల్య NPK విలువలు",
+
+  
+  
+  
+  "humidity": "తేమ",
+  "rainfall": "వర్షపాతం",
+  "rice": "వరి",
+"maize": "మొక్కజొన్న",
+"chickpea": "సెనగ",
+"kidneybeans": "రాజ్మా",
+"pigeonpeas": "కందులు",
+"mothbeans": "మోత్ బీన్స్",
+"mungbean": "పెసలు",
+"blackgram": "మినుములు",
+"lentil": "మసూర్ పప్పు",
+"pomegranate": "దానిమ్మ",
+"banana": "అరటి",
+"mango": "మామిడి",
+"grapes": "ద్రాక్ష",
+"watermelon": "పుచ్చకాయ",
+"muskmelon": "ఖర్బూజ",
+"apple": "ఆపిల్",
+"orange": "నారింజ",
+"papaya": "బొప్పాయి",
+"coconut": "కొబ్బరి",
+"cotton": "పత్తి",
+"jute": "జూట్",
+"coffee": "కాఫీ"
+}
+
+

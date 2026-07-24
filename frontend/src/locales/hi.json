@@ -1,0 +1,73 @@
+{
+  "water": "पानी की आवश्यकता",
+  "marketDemand": "बाजार मांग",
+  "season": "मौसम",
+  "durationLabel": "अवधि",
+  "consequences": "परिणाम",
+
+  "location": "स्थान",
+  "soilType": "मिट्टी का प्रकार",
+  "temperature": "तापमान",
+  "profit": "लाभ",
+
+  "medium": "मध्यम",
+  "high": "उच्च",
+  "kharif": "खरीफ",
+  "duration": "90-120 दिन",
+
+  "heavyRain": "भारी वर्षा",
+  "drought": "सूखा",
+
+  "profitValue": "₹2.4 लाख",
+  "fertilizer": "एनपीके + यूरिया",
+  "farming": "ड्रिप सिंचाई",
+  "states": "तेलंगाना, आंध्र प्रदेश, कर्नाटक",
+  "marketPrice": "₹2300/क्विंटल",
+"login": "लॉगिन", 
+  "register": "रजिस्टर",
+  "email": "ईमेल",
+  "password": "पासवर्ड",
+
+
+  "Black Soil":"काली मिट्टी",
+  "fullName": "पूरा नाम",
+
+  
+  "confidence": "AI विश्वास स्तर",
+  "top3Recommendations": "शीर्ष 3 फसल सिफारिशें",
+  "recommendedCrop": "अनुशंसित फसल",
+  "recommendationReason": "यह फसल क्यों?",
+  "suitableSoil": "उपयुक्त मिट्टी का pH",
+  "favorableTemperature": "अनुकूल तापमान",
+  "goodHumidity": "उचित आर्द्रता",
+  "adequateRainfall": "पर्याप्त वर्षा",
+  "balancedNPK": "संतुलित NPK मान",
+
+ 
+ 
+  "humidity": "आर्द्रता",
+  "rainfall": "वर्षा",
+  "rice": "चावल",
+"maize": "मक्का",
+"chickpea": "चना",
+"kidneybeans": "राजमा",
+"pigeonpeas": "अरहर",
+"mothbeans": "मोठ",
+"mungbean": "मूंग",
+"blackgram": "उड़द",
+"lentil": "मसूर",
+"pomegranate": "अनार",
+"banana": "केला",
+"mango": "आम",
+"grapes": "अंगूर",
+"watermelon": "तरबूज",
+"muskmelon": "खरबूजा",
+"apple": "सेब",
+"orange": "संतरा",
+"papaya": "पपीता",
+"coconut": "नारियल",
+"cotton": "कपास",
+"jute": "जूट",
+"coffee": "कॉफी"
+}
+
