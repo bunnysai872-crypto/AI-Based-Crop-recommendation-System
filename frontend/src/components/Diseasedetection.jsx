@@ -1,131 +1,108 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 
 function DiseaseDetection() {
-  const [image, setImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [preview, setPreview] = useState("");
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setSelectedImage(file);
+      setPreview(URL.createObjectURL(file));
+      setResult(null);
+    }
+  };
 
   const detectDisease = async () => {
-  if (!image) {
-    alert("Please upload a leaf image first.");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("image", image);
-
-  try {
-    const response = await fetch("http://127.0.0.1:5000/detect-disease", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      setResult(data);
-    } else {
-      alert(data.message);
+    if (!selectedImage) {
+      alert("Please upload a leaf image");
+      return;
     }
-  } catch (error) {
-    alert("Server Error");
-    console.error(error);
-  }
-};
+
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        "http://127.0.0.1:5000/detect-disease",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("BACKEND RESPONSE:", data);
+
+      setResult(data);
+
+    } catch (error) {
+      console.log(error);
+      alert("Backend server error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div
-      style={{
-        background: "white",
-        padding: "30px",
-        borderRadius: "20px",
-        boxShadow:
-          "0 5px 15px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h2>📷 Disease Detection</h2>
+    <div>
+      <h2>🌿 AI Plant Disease Detection</h2>
 
       <input
         type="file"
-        onChange={(e) =>
-          setImage(e.target.files[0])
-        }
-        style={{
-          marginTop: "20px",
-        }}
+        accept="image/*"
+        onChange={handleImage}
       />
 
+      {preview && (
+        <div>
+          <h3>Uploaded Image</h3>
+
+          <img
+            src={preview}
+            alt="leaf"
+            width="250"
+          />
+        </div>
+      )}
+
+      <br />
+
       <button
-        onClick={detectDisease}
         style={{
           width: "100%",
-          marginTop: "20px",
-          padding: "12px",
-          background: "#2e7d32",
+          background: "blue",
           color: "white",
+          padding: "14px",
           border: "none",
-          borderRadius: "10px",
-          cursor: "pointer",
+          borderRadius: "8px"
         }}
+        onClick={detectDisease}
       >
-        Detect Disease
+        {loading ? "Analyzing..." : "Detect Disease"}
       </button>
 
       {result && (
-        <div
-          style={{
-            marginTop: "30px",
-            background: "#f1f8e9",
-            padding: "25px",
-            borderRadius: "15px",
-          }}
-        >
-          <h2>
-            🦠 Disease:
-            {" "}
-            {result.disease}
-          </h2>
+  <div
+    style={{
+      marginTop: "20px",
+      padding: "20px",
+      border: "1px solid #ccc",
+      borderRadius: "10px",
+      whiteSpace: "pre-wrap"
+    }}
+  >
+    <h2>🌿 Gemini Disease Analysis</h2>
 
-          <h3>
-            🎯 Confidence:
-            {" "}
-            {result.confidence}
-          </h3>
-
-          <p>
-            💊 Medicine:
-            {" "}
-            <b>
-              {result.medicine}
-            </b>
-          </p>
-
-          <p>
-            🧪 Dosage:
-            {" "}
-            {result.dosage}
-          </p>
-
-          <p>
-            🌱 Prevention:
-            {" "}
-            {result.prevention}
-          </p>
-
-          <button
-            style={{
-              marginTop: "15px",
-              background: "#1976d2",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "10px",
-            }}
-          >
-            📄 Download Report
-          </button>
-        </div>
-      )}
+    {result.analysis || result.message}
+  </div>
+)}
     </div>
   );
 }

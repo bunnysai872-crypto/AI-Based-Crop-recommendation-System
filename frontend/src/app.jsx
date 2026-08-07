@@ -1,4 +1,4 @@
-import Register from "./components/Register";
+
 import { useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
@@ -9,7 +9,6 @@ import MyMachines from "./components/MyMachines";
 
 
 
-import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
 import DiseaseDetection from "./components/DiseaseDetection";
 import MarketPrices from "./components/MarketPrices";
@@ -33,13 +32,15 @@ function App() {
   alert(translated);
 };
  const [language, setLanguage] = useState(i18n.language);
-  const [showRegister, setShowRegister] = useState(false);
-
-
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn] = useState(true);
   const [page, setPage] = useState("crop");
 
  const [soilType, setSoilType] = useState("");
+ const [N, setN] = useState("");
+const [P, setP] = useState("");
+const [K, setK] = useState("");
+const [ph, setPh] = useState("");
+const [error, setError] = useState("");
   const [city, setCity] = useState("");
   const [temperature, setTemperature] = useState("");
 const [currentLocation, setCurrentLocation] = useState("");
@@ -59,22 +60,6 @@ const [locationMode, setLocationMode] = useState("current");
   );
 }
 
- if (showRegister) {
-  return (
-    <Register
-      onBack={() => setShowRegister(false)}
-    />
-  );
-}
-
-if (!loggedIn) {
-  return (
-    <Login
-      onLogin={() => setLoggedIn(true)}
-      onRegister={() => setShowRegister(true)}
-    />
-  );
-}
 
   // Simulated weather API
   const getWeather = async (cityName, lat, lon) => {
@@ -165,7 +150,38 @@ setCity(cityName);
     }
   );
 };
+const validateInputs = () => {
+  if (!N || !P || !K || !ph) {
+    alert("Please enter N, P, K and pH values");
+    return false;
+  }
+
+  if (Number(N) <= 0 || Number(N) > 140) {
+    alert("Nitrogen must be between 1 and 140");
+    return false;
+  }
+
+  if (Number(P) <= 0 || Number(P) > 145) {
+    alert("Phosphorus must be between 1 and 145");
+    return false;
+  }
+
+  if (Number(K) <= 0 || Number(K) > 205) {
+    alert("Potassium must be between 1 and 205");
+    return false;
+  }
+
+  if (Number(ph) < 3.5 || Number(ph) > 10) {
+    alert("pH must be between 3.5 and 10");
+    return false;
+  }
+
+  return true;
+};
   const getRecommendation = async () => {
+    if (!validateInputs()) {
+  return;
+}
   try {
     if (!soilType) {
      await showMessage("Please select Soil Type");
@@ -328,119 +344,235 @@ console.log("Weather:", weather);
   ph: soil.ph,
   rainfall,
 });
-    const response = await axios.post(
-      "http://127.0.0.1:5000/predict",
-      {
-        N: soil.N,
-        P: soil.P,
-        K: soil.K,
-        temperature: temp,
-        humidity: humidity,
-        ph: soil.ph,
-        rainfall: rainfall,
-      }
-    );
+  const response = await axios.post(
+  "http://127.0.0.1:5000/predict",
+  {
+    soiltype: soilType,
 
-   const predictedCrop =
-response.data.recommended_crop.toLowerCase();
+    N: Number(N),
+    P: Number(P),
+    K: Number(K),
+
+    temperature: temp,
+    humidity: humidity,
+
+    ph: Number(ph),
+
+    rainfall: rainfall,
+  }
+);
+console.log("PREDICTION RESPONSE:", response.data);
+ const predictedCrop =
+(
+  response.data.recommended_crop ||
+  response.data.result
+)?.toLowerCase();
+
+
+if (!predictedCrop) {
+  await showMessage("Crop prediction failed");
+  return;
+}
+
+if (!predictedCrop) {
+  await showMessage("Crop prediction failed");
+  return;
+}
+
 const translatedCrop =
   i18n.language === "en"
     ? predictedCrop
     : await translateText(predictedCrop, i18n.language);
-    const confidence = response.data.confidence;
-const top3 = response.data.top3;
 
-let profit = "₹1.5 Lakhs / acre";
+const confidence = response.data.confidence || 90;
 
-switch (predictedCrop.toLowerCase()) {
-  case "rice":
-    profit = "₹45,000 / acre";
-    break;
+const top3 = response.data.top3 || [
+  {
+    crop: predictedCrop,
+    confidence: confidence
+  }
+];
+let cropDetails = {
+  rice: {
+    water: "Very High",
+    season: "Kharif",
+    duration: "120-150 days",
+    consequences: "Flood damage",
+    precautions: "Maintain drainage"
+  },
 
-  case "wheat":
-    profit = "₹35,000 / acre";
-    break;
+  wheat: {
+    water: "Medium",
+    season: "Rabi",
+    duration: "120-140 days",
+    consequences: "Heat stress",
+    precautions: "Provide irrigation"
+  },
 
-  case "groundnut":
-    profit = "₹60,000 / acre";
-    break;
+  maize: {
+    water: "Medium",
+    season: "Kharif",
+    duration: "90-110 days",
+    consequences: "Drought stress",
+    precautions: "Use drip irrigation"
+  },   // <-- COMMA REQUIRED
 
-  case "soybean":
-    profit = "₹40,000 / acre";
-    break;
+  chickpea: {
+    water: "Low",
+    season: "Rabi",
+    duration: "90-120 days",
+    consequences: "Root rot disease",
+    precautions: "Avoid waterlogging"
+  },
+  kidneybeans: {
+  water: "Medium",
+  season: "Rabi",
+  duration: "100-120 days",
+  consequences: "Leaf spot disease",
+  precautions: "Use disease-resistant varieties"
+},
 
-  case "redgram":
-    profit = "₹55,000 / acre";
-    break;
+pigeonpeas: {
+  water: "Low",
+  season: "Kharif",
+  duration: "150-180 days",
+  consequences: "Wilt disease",
+  precautions: "Practice crop rotation"
+},
 
-  case "greengram":
-    profit = "₹50,000 / acre";
-    break;
+mothbeans: {
+  water: "Very Low",
+  season: "Kharif",
+  duration: "75-90 days",
+  consequences: "Poor germination",
+  precautions: "Use certified seeds"
+},
 
-  case "blackgram":
-    profit = "₹48,000 / acre";
-    break;
+mungbean: {
+  water: "Low",
+  season: "Summer/Kharif",
+  duration: "60-75 days",
+  consequences: "Yellow Mosaic Virus",
+  precautions: "Control whiteflies"
+},
 
-  case "horsegram":
-    profit = "₹38,000 / acre";
-    break;
+blackgram: {
+  water: "Low",
+  season: "Kharif",
+  duration: "80-100 days",
+  consequences: "Powdery mildew",
+  precautions: "Timely fungicide spray"
+},
 
-  case "peas":
-    profit = "₹45,000 / acre";
-    break;
+lentil: {
+  water: "Low",
+  season: "Rabi",
+  duration: "100-120 days",
+  consequences: "Rust disease",
+  precautions: "Monitor disease regularly"
+},
+banana: {
+  water: "Very High",
+  season: "Year Round",
+  duration: "10-12 months",
+  consequences: "Root rot",
+  precautions: "Ensure proper drainage"
+},
 
-  case "guava":
-    profit = "₹1,80,000 / acre";
-    break;
+mango: {
+  water: "Medium",
+  season: "Summer",
+  duration: "3-5 years",
+  consequences: "Fruit fly attack",
+  precautions: "Regular orchard monitoring"
+},
 
-  case "banana":
-    profit = "₹2,50,000 / acre";
-    break;
+grapes: {
+  water: "Medium",
+  season: "Winter",
+  duration: "120-150 days",
+  consequences: "Powdery mildew",
+  precautions: "Proper pruning and spraying"
+},
 
-  case "mango":
-    profit = "₹2,00,000 / acre";
-    break;
+watermelon: {
+  water: "Medium",
+  season: "Summer",
+  duration: "80-100 days",
+  consequences: "Fruit cracking",
+  precautions: "Maintain consistent irrigation"
+},
 
-  case "grapes":
-    profit = "₹3,50,000 / acre";
-    break;
+orange: {
+  water: "Medium",
+  season: "Year Round",
+  duration: "3-4 years",
+  consequences: "Citrus canker",
+  precautions: "Prune infected branches"
+},
 
-  case "watermelon":
-    profit = "₹1,20,000 / acre";
-    break;
+papaya: {
+  water: "Medium",
+  season: "Year Round",
+  duration: "8-10 months",
+  consequences: "Papaya ring spot virus",
+  precautions: "Use healthy seedlings"
+},
 
-  case "muskmelon":
-    profit = "₹1,10,000 / acre";
-    break;
+coconut: {
+  water: "High",
+  season: "Year Round",
+  duration: "5-7 years",
+  consequences: "Bud rot disease",
+  precautions: "Maintain field sanitation"
+},
 
-  case "tomato":
-    profit = "₹1,50,000 / acre";
-    break;
+apple: {
+  water: "Medium",
+  season: "Winter",
+  duration: "4-5 years",
+  consequences: "Apple scab",
+  precautions: "Regular fungicide application"
+},
 
-  case "chilli":
-    profit = "₹2,20,000 / acre";
-    break;
+pomegranate: {
+  water: "Low",
+  season: "Year Round",
+  duration: "5-6 months",
+  consequences: "Fruit borer attack",
+  precautions: "Monitor orchard frequently"
+},
 
-  case "onion":
-    profit = "₹1,30,000 / acre";
-    break;
+jute: {
+  water: "High",
+  season: "Kharif",
+  duration: "120-150 days",
+  consequences: "Stem rot disease",
+  precautions: "Use certified seeds"
+},
 
-  case "coconut":
-    profit = "₹1,80,000 / acre";
-    break;
-
-  case "sugarcane":
-    profit = "₹90,000 / acre";
-    break;
-
-  case "sunflower":
-    profit = "₹50,000 / acre";
-    break;
-
-  case "ragi":
-    profit = "₹35,000 / acre";
-    break;
+coffee: {
+  water: "Medium",
+  season: "Year Round",
+  duration: "3-4 years",
+  consequences: "Coffee leaf rust",
+  precautions: "Shade management and fungicides"
 }
+  
+  
+};
+
+
+const details =
+  cropDetails[predictedCrop.toLowerCase()] ||
+  {
+    water:"medium",
+    season:"kharif",
+    duration:"90 to 120 days",
+    consequences:"Climate risk",
+    precautions:"Monitor crop regularly"
+  };
+
    setCropInfo({
   name: predictedCrop.toLowerCase(),
   translatedName: translatedCrop,
@@ -470,42 +602,47 @@ soilType: soilType,
   rainfall: rainfall,
 
  profit:
-  i18n.language === "en"
-    ? profit
-    : await translateText(profit, i18n.language),
+  response.data.profit,
+
+demand:
+  response.data.market_demand,
+
+marketPrice:
+  response.data.market_price,
   
 
-  water: "medium",
+  water:
+  i18n.language === "en"
+    ? details.water
+    : await translateText(details.water, i18n.language),
 
-demand: "high",
 
-  season:
-  temp >= 30
-    ? "kharif"
-    : temp >= 20
-    ? "rabi"
-    : "zaid",
+
+
+
+season:
+  i18n.language === "en"
+    ? details.season
+    : await translateText(details.season, i18n.language),
 
 
 duration:
   i18n.language === "en"
-    ? "90 to 120 days"
-    : await translateText("90 to 120 days", i18n.language),
-fertilizer: "NPK + Urea",
+    ? details.duration
+    : await translateText(details.duration, i18n.language),
 
-  farming: "Drip Irrigation",
 
- consequences:
-  temp > 35 ? "Drought" : "Heavy Rain",
-
-  precautions:
-  temp > 35
-    ? "droughtPrecautions"
-    : "heavyRainPrecautions",
- marketPrice:
+consequences:
   i18n.language === "en"
-    ? "₹2300/Quintal"
-    : await translateText("₹2300/Quintal", i18n.language),
+    ? details.consequences
+    : await translateText(details.consequences, i18n.language),
+
+
+precautions:
+  i18n.language === "en"
+    ? details.precautions
+    : await translateText(details.precautions, i18n.language),
+ 
 });
   } catch (error) {
     console.log(error);
@@ -716,35 +853,46 @@ fertilizer: "NPK + Urea",
         </div>
 
         {/* Dashboard */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit,minmax(180px,1fr))",
-            gap: "20px",
-            marginBottom: "30px",
-          }}
-        >
-          <div style={dashboardCard}>
-            <h1>🌾</h1>
-            <h3>{t("cropAI")}</h3>
-          </div>
+<div
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: "20px",
+    marginBottom: "30px",
+  }}
+>
+  <div
+    style={{ ...dashboardCard, cursor: "pointer" }}
+    onClick={() => setPage("crop")}
+  >
+    <h1>🌾</h1>
+    <h3>{t("cropAI")}</h3>
+  </div>
 
-          <div style={dashboardCard}>
-            <h1>📷</h1>
-            <h3>{t("diseaseAI")}</h3>
-          </div>
+  <div
+    style={{ ...dashboardCard, cursor: "pointer" }}
+    onClick={() => setPage("disease")}
+  >
+    <h1>📷</h1>
+    <h3>{t("diseaseAI")}</h3>
+  </div>
 
-          <div style={dashboardCard}>
-            <h1>🌦</h1>
-            <h3>{t("weatherAI")}</h3>
-          </div>
+  <div
+    style={{ ...dashboardCard, cursor: "pointer" }}
+    onClick={() => setPage("weather")}
+  >
+    <h1>🌦</h1>
+    <h3>{t("weatherAI")}</h3>
+  </div>
 
-          <div style={dashboardCard}>
-            <h1>💹</h1>
-            <h3>{t("marketAI")}</h3>
-          </div>
-        </div>
+  <div
+    style={{ ...dashboardCard, cursor: "pointer" }}
+    onClick={() => setPage("market")}
+  >
+    <h1>💹</h1>
+    <h3>{t("marketAI")}</h3>
+  </div>
+</div>
 
         {/* Crop */}
         {page === "crop" && (
@@ -752,7 +900,22 @@ fertilizer: "NPK + Urea",
             <h2>
               🌾 {t("crop")}
             </h2>
+          <div
+  style={{
+    background: "#fff3cd",
+    color: "#856404",
+    border: "1px solid #ffeeba",
+    padding: "15px",
+    borderRadius: "10px",
+    marginBottom: "20px",
+    fontSize: "14px",
+    lineHeight: "1.6",
+  }}
+>
+  <h4>{t("disclaimerTitle")}</h4>
 
+  <p>{t("disclaimerText")}</p>
+</div>
             <select
   value={soilType}
   onChange={(e) => setSoilType(e.target.value)}
@@ -794,6 +957,46 @@ fertilizer: "NPK + Urea",
     {t("Peaty Soil")}
   </option>
 </select>
+<input
+  type="number"
+  placeholder="Nitrogen (N)"
+  value={N}
+  min="1"
+  max="140"
+  onChange={(e) => setN(e.target.value)}
+  style={inputStyle}
+/>
+
+<input
+  type="number"
+  placeholder="Phosphorus (P)"
+  value={P}
+  min="1"
+  max="145"
+  onChange={(e) => setP(e.target.value)}
+  style={inputStyle}
+/>
+
+<input
+  type="number"
+  placeholder="Potassium (K)"
+  value={K}
+  min="1"
+  max="205"
+  onChange={(e) => setK(e.target.value)}
+  style={inputStyle}
+/>
+
+<input
+  type="number"
+  placeholder="pH"
+  value={ph}
+  min="3.5"
+  max="10"
+  step="0.1"
+  onChange={(e) => setPh(e.target.value)}
+  style={inputStyle}
+/>
     <select
   value={city}
  onChange={(e) => {
@@ -925,7 +1128,11 @@ fertilizer: "NPK + Urea",
 </p>
 <p>
   📈 {t("demand")}:
-  📈 {t(cropInfo.demand)}
+  {cropInfo.demand}
+</p>
+<p>
+  🏷 Market Price:
+  ₹{cropInfo.marketPrice}/quintal
 </p>
 
 <p>
@@ -946,9 +1153,9 @@ fertilizer: "NPK + Urea",
   🌧 {t("rainfall")}: {cropInfo.rainfall} mm
 </p>
 <p>
-  💰 {t("profit")}: {cropInfo.profit}
+  💰 {t("profit")}:
+  ₹{Number(cropInfo.profit).toLocaleString()}/acre
 </p>
-
                 <button
                   onClick={
                     downloadReport
@@ -1024,8 +1231,8 @@ const dashboardCard = {
   padding: "25px",
   borderRadius: "15px",
   textAlign: "center",
-  boxShadow:
-    "0 5px 15px rgba(0,0,0,0.1)",
+  boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+  transition: "0.3s",
 };
 
 const card = {

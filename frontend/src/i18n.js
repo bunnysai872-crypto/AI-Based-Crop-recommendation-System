@@ -143,6 +143,28 @@ heavyRainfall: "Heavy",
   "totalRecords": "Total Records",
   useCurrentLocation: "Use Current Location",
 recommend: "Get Recommendation",
+disclaimerTitle: "⚠️ Disclaimer",
+
+  "myMachines": "My Machines",
+  "enterPhoneNumber": "Enter Registered Phone Number",
+  "enterPin": "Enter Your PIN",
+  "search": "Search",
+  "noMachinesFound": "No machines found.",
+  "owner": "Owner",
+  "phone": "Phone",
+  "district": "District",
+  "village": "Village",
+  "rent": "Rent",
+  "status": "Status",
+  "delete": "Delete",
+
+
+  "myMachines": "My Machines",
+
+quote: "🌱 Healthy soil, healthy crops, prosperous farmers.",
+
+disclaimerText:
+  "This crop recommendation is generated using AI based on soil parameters, weather conditions, and soil type. Farmers are advised to obtain a Soil Health Card from an authorized soil testing laboratory before using this recommendation. The N, P, K, and pH values should preferably come from a recent soil test report. Results may be less accurate if estimated values are used. Always consult local agricultural experts before making final cultivation decisions.",
 
 
 heavyRainPrecautions:
@@ -269,6 +291,20 @@ moderateRainfall: "मध्यम",
 heavyRainfall: "अधिक",
 "machines": "कृषि मशीनें",
 
+  "myMachines": "मेरी मशीनें",
+  "enterPhoneNumber": "पंजीकृत फोन नंबर दर्ज करें",
+  "enterPin": "अपना PIN दर्ज करें",
+  "search": "खोजें",
+  "noMachinesFound": "कोई मशीन नहीं मिली।",
+  "owner": "मालिक",
+  "phone": "फोन",
+  "district": "जिला",
+  "village": "गांव",
+  "rent": "किराया",
+  "status": "स्थिति",
+  "delete": "हटाएं",
+
+
 "farmMachines": "कृषि मशीनें",
   "registerMachine": "मशीन रजिस्टर करें",
   "rentMachine": "मशीन किराये पर लें",
@@ -291,6 +327,14 @@ heavyRainfall: "अधिक",
   "maxPrice": "अधिकतम मूल्य",
   "modalPrice": "मॉडल मूल्य",
   "totalRecords": "कुल रिकॉर्ड",
+  disclaimerTitle: "⚠️ अस्वीकरण",
+  
+  "myMachines": "मेरी मशीनें",
+
+    quote: "🌱 स्वस्थ मिट्टी, स्वस्थ फसलें, समृद्ध किसान।",
+
+disclaimerText:
+  "यह फसल सिफारिश मिट्टी के मानकों, मौसम की स्थिति और मिट्टी के प्रकार के आधार पर AI द्वारा तैयार की गई है। किसानों को इस सिफारिश का उपयोग करने से पहले अधिकृत मृदा परीक्षण प्रयोगशाला से Soil Health Card प्राप्त करने की सलाह दी जाती है। N, P, K और pH मान हाल ही की मिट्टी परीक्षण रिपोर्ट से होने चाहिए। अनुमानित मानों का उपयोग करने पर परिणाम कम सटीक हो सकते हैं। अंतिम खेती निर्णय लेने से पहले स्थानीय कृषि विशेषज्ञों से सलाह अवश्य लें।",
 
 
 heavyRainPrecautions:
@@ -439,6 +483,28 @@ heavyRainfall: "అధికం",
   "maxPrice": "గరిష్ట ధర",
   "modalPrice": "మధ్య ధర",
   "totalRecords": "మొత్తం రికార్డులు",
+  disclaimerTitle: "⚠️ హెచ్చరిక",
+  
+  "myMachines": "నా యంత్రాలు",
+  "enterPhoneNumber": "నమోదైన ఫోన్ నంబర్ నమోదు చేయండి",
+  "enterPin": "మీ PIN నమోదు చేయండి",
+  "search": "వెతకండి",
+  "noMachinesFound": "యంత్రాలు కనుగొనబడలేదు.",
+  "owner": "యజమాని",
+  "phone": "ఫోన్",
+  "district": "జిల్లా",
+  "village": "గ్రామం",
+  "rent": "అద్దె",
+  "status": "స్థితి",
+  "delete": "తొలగించు",
+
+  
+  "myMachines": "నా యంత్రాలు",
+
+   quote: "🌱 ఆరోగ్యకరమైన నేల, ఆరోగ్యకరమైన పంటలు, సంపన్న రైతులు.",
+
+disclaimerText:
+  "ఈ పంట సిఫార్సు మట్టి పరామితులు, వాతావరణ పరిస్థితులు మరియు నేల రకం ఆధారంగా AI ద్వారా రూపొందించబడింది. రైతులు ఈ సిఫార్సును ఉపయోగించే ముందు గుర్తింపు పొందిన మట్టి పరీక్షా ప్రయోగశాల నుండి Soil Health Card పొందాలని సూచించబడుతుంది. N, P, K మరియు pH విలువలు తాజా మట్టి పరీక్ష నివేదిక నుండి తీసుకోవడం మంచిది. అంచనా విలువలు ఉపయోగిస్తే ఫలితాలు తక్కువ ఖచ్చితత్వంతో ఉండవచ్చు. తుది వ్యవసాయ నిర్ణయాలు తీసుకునే ముందు స్థానిక వ్యవసాయ నిపుణులను సంప్రదించండి.",
 
 
 heavyRainPrecautions:
@@ -565,6 +631,7 @@ lowRainfall: "குறைவு",
 moderateRainfall: "மிதமான",
 heavyRainfall: "அதிகம்",
 "machines": "விவசாய இயந்திரங்கள்",
+ quote: "🌱 ஆரோக்கியமான மண், ஆரோக்கியமான பயிர்கள், வளமான விவசாயிகள்.",
 
 "farmMachines": "விவசாய இயந்திரங்கள்",
   "registerMachine": "மெஷின் பதிவு செய்யவும்",
@@ -578,6 +645,23 @@ heavyRainfall: "அதிகம்",
   "availability": "கிடைக்கும் நிலை",
   "callOwner": "மாலிகரை அழைக்கவும்",
   "noMachines": "கிடைக்கும் மெஷின்கள் இல்லை",
+  
+  "myMachines": "என் இயந்திரங்கள்",
+  
+  "myMachines": "என் இயந்திரங்கள்",
+  "enterPhoneNumber": "பதிவு செய்யப்பட்ட தொலைபேசி எண்ணை உள்ளிடவும்",
+  "enterPin": "உங்கள் PIN ஐ உள்ளிடவும்",
+  "search": "தேடு",
+  "noMachinesFound": "எந்த இயந்திரமும் கிடைக்கவில்லை.",
+  "owner": "உரிமையாளர்",
+  "phone": "தொலைபேசி",
+  "district": "மாவட்டம்",
+  "village": "கிராமம்",
+  "rent": "வாடகை",
+  "status": "நிலை",
+  "delete": "நீக்கு",
+
+
 
   "selectState": "மாநிலத்தை தேர்ந்தெடுக்கவும்",
   "selectCrop": "பயிரை தேர்ந்தெடுக்கவும்",
@@ -588,6 +672,10 @@ heavyRainfall: "அதிகம்",
   "maxPrice": "அதிகபட்ச விலை",
   "modalPrice": "சராசரி விலை",
   "totalRecords": "மொத்த பதிவுகள்",
+  disclaimerTitle: "⚠️ எச்சரிக்கை",
+
+disclaimerText:
+  "இந்த பயிர் பரிந்துரை மண் அளவுருக்கள், வானிலை நிலைமைகள் மற்றும் மண் வகையை அடிப்படையாகக் கொண்டு AI மூலம் உருவாக்கப்பட்டுள்ளது. இந்த பரிந்துரையை பயன்படுத்துவதற்கு முன் அங்கீகரிக்கப்பட்ட மண் பரிசோதனை ஆய்வகத்திலிருந்து Soil Health Card பெற விவசாயிகள் அறிவுறுத்தப்படுகிறார்கள். N, P, K மற்றும் pH மதிப்புகள் சமீபத்திய மண் பரிசோதனை அறிக்கையிலிருந்து பெறப்பட வேண்டும். மதிப்பிடப்பட்ட தரவுகளை பயன்படுத்தினால் முடிவுகள் குறைந்த துல்லியத்துடன் இருக்கலாம். இறுதி விவசாய முடிவுகளை எடுப்பதற்கு முன் உள்ளூர் வேளாண்மை நிபுணர்களை அணுகவும்.",
 
 
 heavyRainPrecautions:

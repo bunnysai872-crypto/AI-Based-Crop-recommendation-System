@@ -1,7 +1,16 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function Sidebar({ setPage }) {
   const { t } = useTranslation();
+  const [showMenu, setShowMenu] = useState(false);
+ 
+
+  const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.reload();
+};
 
   const menu = {
     width: "100%",
@@ -52,29 +61,9 @@ function Sidebar({ setPage }) {
         </p>
       </div>
 
-      {/* Profile */}
-      <div
-        style={{
-          background: "rgba(255,255,255,0.1)",
-          padding: "20px",
-          borderRadius: "20px",
-          textAlign: "center",
-          marginBottom: "25px",
-        }}
-      >
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
-          alt=""
-          style={{
-            width: "70px",
-            height: "70px",
-            borderRadius: "50%",
-          }}
-        />
+       
 
-        <h3>👨‍🌾 {t("farmer")}</h3>
-        <p>{t("welcome")}</p>
-      </div>
+
 
       {/* Menu */}
       <button
@@ -130,14 +119,14 @@ function Sidebar({ setPage }) {
   style={menu}
   onClick={() => setPage("myMachines")}
 >
-  👨 My Machines
+  👨 {t("myMachines")}
 </button>
-      <button
-        style={menu}
-        onClick={() => setPage("chat")}
-      >
-        🤖 {t("chatbot")}
-      </button>
+     <button
+  style={menu}
+  onClick={() => setPage("chat")}
+>
+  🤖 {t("chatbot")}
+</button>
 
       <button
         style={menu}
@@ -146,19 +135,47 @@ function Sidebar({ setPage }) {
         🔔 {t("notifications")}
       </button>
 
-      {/* Footer */}
-      <div
-        style={{
-          marginTop: "40px",
-          padding: "15px",
-          background: "rgba(255,255,255,0.1)",
-          borderRadius: "15px",
-          textAlign: "center",
-        }}
-      >
-        <h4>{t("title")}</h4>
-        <p>{t("version")}</p>
-      </div>
+    <div
+  style={{
+    padding: "18px",
+    background: "rgba(255,255,255,0.12)",
+    borderRadius: "15px",
+    textAlign: "center",
+    marginTop: "20px",
+    marginBottom: "12px",
+    backdropFilter: "blur(10px)",
+  }}
+>
+
+  <p
+    style={{
+      fontSize: "14px",
+      lineHeight: "1.6",
+      fontStyle: "italic",
+      color: "#fff",
+      margin: 0,
+    }}
+  >
+    {t("quote")}
+  </p>
+</div>
+   <button
+  onClick={handleLogout}
+  style={{
+    width: "100%",
+    padding: "15px",
+    marginTop: "20px",
+    border: "none",
+    borderRadius: "15px",
+    background: "#9c4034",
+    color: "white",
+    fontSize: "16px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  🚪 Logout
+</button>
     </div>
   );
 }

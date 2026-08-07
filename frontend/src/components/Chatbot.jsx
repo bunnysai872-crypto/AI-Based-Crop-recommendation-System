@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+
 function Chatbot() {
   const [messages, setMessages] = useState([
     {
@@ -55,32 +56,70 @@ function Chatbot() {
     ]);
   };
 
-  const sendMessage = () => {
-    if (!input) return;
+  const sendMessage = async () => {
+  if (!input.trim()) return;
 
-    let response =
-      "🤖 Thank you. AI analysis is processing your query.";
+  const userMessage = input;
 
-    if (input.toLowerCase().includes("crop"))
-      response =
-        "🌾 Best crops: Cotton, Groundnut, Maize.";
+  // Show user's message
+  setMessages((prev) => [
+    ...prev,
+    {
+      sender: "user",
+      text: userMessage,
+    },
+  ]);
 
-    if (input.toLowerCase().includes("weather"))
-      response =
-        "🌦 Weather: 31°C, Humidity 68%.";
+  setInput("");
 
-    if (input.toLowerCase().includes("price"))
-      response =
-        "📈 Cotton: ₹7200/qtl.";
+  // Show temporary loading message
+  setMessages((prev) => [
+    ...prev,
+    {
+      sender: "bot",
+      text: "⏳ Thinking...",
+    },
+  ]);
+
+  try {
+    const response = await fetch("http://127.0.0.1:5000/farmgpt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: userMessage,
+      }),
+    });
+
+    const data = await response.json();
+
+    // Remove "Thinking..."
+    setMessages((prev) => prev.slice(0, -1));
+
+    let reply = data.reply;
 
     setMessages((prev) => [
       ...prev,
-      { sender: "user", text: input },
-      { sender: "bot", text: response },
+      {
+        sender: "bot",
+        text: reply,
+      },
+    ]);
+  } catch (error) {
+    setMessages((prev) => prev.slice(0, -1));
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: "❌ Unable to connect to the AI server.",
+      },
     ]);
 
-    setInput("");
-  };
+    console.log(error);
+  }
+};
 
   return (
     <div
@@ -209,18 +248,21 @@ function Chatbot() {
         }}
       >
         <input
-          value={input}
-          onChange={(e) =>
-            setInput(e.target.value)
-          }
-          placeholder="Ask anything..."
-          style={{
-            flex: 1,
-            padding: "12px",
-            borderRadius: "10px",
-            border: "1px solid #ccc",
-          }}
-        />
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  }}
+  placeholder="Ask your farming question..."
+  style={{
+    flex: 1,
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #ccc",
+  }}
+/>
 
         <button
           onClick={sendMessage}

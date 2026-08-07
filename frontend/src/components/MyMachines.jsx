@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 function MyMachines() {
  const [phone, setPhone] = useState("");
@@ -72,7 +73,7 @@ const [pin, setPin] = useState("");
 
       <input
         type="text"
-        placeholder="Enter Registered Phone Number"
+        placeholder="Enter Phone Number"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         style={{

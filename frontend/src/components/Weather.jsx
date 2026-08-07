@@ -46,16 +46,32 @@ const getCurrentLocationWeather = () => {
 
       try {
 
-        const response = await axios.get(
+        // Get exact location from Flask
+        const locationResponse = await axios.post(
+          "http://127.0.0.1:5000/current-location",
+          {
+            latitude: lat,
+            longitude: lon
+          }
+        );
+
+        const locationName =
+          locationResponse.data.city ||
+          locationResponse.data.village ||
+          locationResponse.data.location ||
+          "Current Location";
+
+        // Get weather
+        const weatherResponse = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
         );
 
         setWeather({
-          city: response.data.name,
-          temperature: response.data.main.temp,
-          humidity: response.data.main.humidity,
-          wind: response.data.wind.speed,
-          condition: response.data.weather[0].main,
+          city: locationName,
+          temperature: weatherResponse.data.main.temp,
+          humidity: weatherResponse.data.main.humidity,
+          wind: weatherResponse.data.wind.speed,
+          condition: weatherResponse.data.weather[0].main,
         });
 
       } catch (error) {

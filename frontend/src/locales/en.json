@@ -85,6 +85,17 @@
 "cropAI": "Crop AI",
 "diseaseAI": "Disease Detection",
 "weatherAI": "Weather",
-"marketAI": "Market Prices"
+"marketAI": "Market Prices",
+
+  "quote": "🌱 Healthy soil, healthy crops, prosperous farmers.",
+
+
+  "disclaimerTitle": "⚠️ Disclaimer",
+  "disclaimerText": "This crop recommendation is generated using AI based on soil parameters, weather conditions, and soil type. Farmers are advised to obtain a Soil Health Card from an authorized soil testing laboratory before using this recommendation. The N, P, K, and pH values should preferably come from a recent soil test report. Results may be less accurate if estimated values are used. Always consult local agricultural experts before making final cultivation decisions.",
+
+  "disclaimerTitle": "⚠️ Disclaimer",
+  "disclaimerText": "This crop recommendation is generated using AI based on soil parameters, weather conditions, and soil type. Farmers are advised to obtain a Soil Health Card from an authorized soil testing laboratory before using this recommendation. The N, P, K, and pH values should preferably come from a recent soil test report. Results may be less accurate if estimated values are used. Always consult local agricultural experts before making final cultivation decisions."
+
 }
+
 

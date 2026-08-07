@@ -1,0 +1,37 @@
+{
+    "Tomato Early Blight":
+    "Remove infected leaves, avoid overhead irrigation, and apply recommended fungicide.",
+
+    "Tomato Late Blight":
+    "Use copper-based fungicide, remove infected plants, and maintain proper spacing.",
+
+    "Tomato Leaf Mold":
+    "Improve air circulation and reduce humidity around plants.",
+
+    "Potato Early Blight":
+    "Use disease-resistant seeds and apply fungicide treatment.",
+
+    "Potato Late Blight":
+    "Remove infected plants immediately and apply copper fungicide.",
+
+    "Rice Blast":
+    "Use resistant varieties, maintain balanced fertilizer and apply fungicide.",
+
+    "Rice Brown Spot":
+    "Improve soil nutrients and apply suitable fungicide.",
+
+    "Wheat Rust":
+    "Apply fungicide and use rust-resistant wheat varieties.",
+
+    "Corn Leaf Blight":
+    "Remove infected leaves and apply recommended fungicide.",
+
+    "Apple Scab":
+    "Remove infected leaves and apply fungicide spray.",
+
+    "Grape Powdery Mildew":
+    "Maintain proper airflow and apply sulfur-based treatment.",
+
+    "Healthy":
+    "Plant is healthy. Continue proper irrigation, nutrition, and monitoring."
+}

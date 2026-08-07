@@ -9,38 +9,24 @@ from geopy.geocoders import Nominatim
 from deep_translator import GoogleTranslator
 import os
 from PIL import Image
-from tensorflow.keras.models import load_model
-from PIL import Image
-import numpy as np
-import json
 import yfinance as yf
 import random
-
-
-# Load the disease prediction model
-try:
-    disease_model = load_model("plant_disease_model.keras")
-    with open("class_names.json", "r") as f:
-        class_names = json.load(f)
-    print("Disease Model Loaded Successfully")
-except Exception as e:
-    print("Disease Model Error:", e)
-    
-    from tensorflow.keras.models import load_model
+import uuid
+from vision_disease import detect_plant_disease
+from leaf_checker import is_leaf
+from PIL import Image
+from model_service import predict_disease
+from disease_verifier import verify_disease
+from chatbot import farm_chat
 import json
 
-try:
-    disease_model = load_model("plant_disease_model.keras")
+import numpy as np
+from gemini_service import ask_gemini
+from PIL import Image
+import numpy as np
 
-    with open("class_names.json", "r") as f:
-        class_indices = json.load(f)
 
-    class_names = list(class_indices.keys())
 
-    print("Disease Model Loaded Successfully")
-
-except Exception as e:
-    print("Disease Model Error:", e)
 
 def translate_text(text, language):
     try:
@@ -56,7 +42,131 @@ def translate_text(text, language):
         print("Translation Error:", e)
         return text
 app = Flask(__name__)
-CORS(app)   # Enable CORS
+CORS(app)
+# Load Disease Model
+
+
+
+# Load YOLO Model (optional)
+
+
+
+
+
+# Load Treatment Database
+
+with open("treatments.json") as file:
+    treatment_data = json.load(file)
+
+
+
+
+# -------------------------------
+# Gemini Configuration
+# -------------------------------
+
+#GEMINI_API_KEY = "AQ.Ab8RN6IE-pTHBq2mexKCZqzrYFg07_yjisbsD6SF2ClGAtraAg"
+
+#genai.configure(api_key=GEMINI_API_KEY)
+
+#gemini_model = genai.GenerativeModel(
+#    model_name="gemini-2.0-flash"
+#)
+
+# Stores conversation history
+chat_sessions = {}
+SYSTEM_PROMPT = """
+You are AgriAI, an expert AI assistant for farmers.
+
+Your goal is to answer ALL agriculture-related questions accurately, clearly, and helpfully.
+
+Your knowledge includes:
+
+1. Crop cultivation
+2. Crop recommendation
+3. Soil types and soil health
+4. Fertilizers and nutrient management
+5. Organic farming
+6. Irrigation methods
+7. Water management
+8. Weed management
+9. Pest management
+10. Plant disease management
+11. Seed selection
+12. Seed treatment
+13. Harvesting
+14. Post-harvest storage
+15. Market prices
+16. Government schemes
+17. Weather impact on crops
+18. Horticulture
+19. Floriculture
+20. Fruit cultivation
+21. Vegetable cultivation
+22. Plantation crops
+23. Medicinal plants
+24. Dairy farming
+25. Goat farming
+26. Sheep farming
+27. Poultry farming
+28. Fish farming
+29. Beekeeping
+30. Mushroom cultivation
+31. Farm machinery
+32. Precision farming
+33. Smart farming
+34. Greenhouse farming
+35. Hydroponics
+36. Aquaponics
+37. Sustainable agriculture
+38. Climate-smart agriculture
+39. Agricultural economics
+40. Farm business planning
+
+If the user asks for:
+
+• Crop recommendation → reply ONLY:
+TOOL:CROP
+
+• Disease detection from a leaf image → reply ONLY:
+TOOL:DISEASE
+
+• Weather information → reply ONLY:
+TOOL:WEATHER
+
+• Market prices → reply ONLY:
+TOOL:MARKET
+
+For every other agriculture-related question:
+- Answer directly.
+- Give practical advice.
+- Explain step by step when needed.
+- Suggest preventive measures if relevant.
+- Mention safety precautions for pesticide use.
+- If the user does not provide enough information (crop, location, soil type, etc.), ask follow-up questions before giving advice.
+
+Never answer with unrelated topics unless the user explicitly asks.
+
+Always behave like an experienced agricultural expert who helps farmers solve real farming problems.
+"""
+def get_chat(session_id):
+
+    if session_id not in chat_sessions:
+
+        chat_sessions[session_id] = gemini_model.start_chat(
+            history=[
+                {
+                    "role":"user",
+                    "parts":[SYSTEM_PROMPT]
+                },
+                {
+                    "role":"model",
+                    "parts":["Hello Farmer 👋 How can I help you today?"]
+                }
+            ]
+        )
+
+    return chat_sessions[session_id]# Enable CORS
 
 # Connect MySQL
 try:
@@ -75,7 +185,13 @@ except Exception as e:
 # Load model
 try:
     model = pickle.load(open("crop_model.pkl", "rb"))
+    soil_encoder = pickle.load(
+        open("soil_encoder.pkl", "rb")
+    )
+
     print("Model Loaded Successfully")
+    print("Soil Encoder Loaded")
+
 except Exception as e:
     print("Model Error:", e)
 
@@ -85,20 +201,76 @@ def home():
     return "AI Crop Recommendation API Running"
 
 # Prediction route
+# ---------------- MARKET DATA ----------------
+
+crop_market_data = {
+    "rice": {"price": 2800, "yield": 25, "cost": 25000},
+    "wheat": {"price": 2600, "yield": 20, "cost": 18000},
+    "ragi": {"price": 4200, "yield": 10, "cost": 12000},
+    "banana": {"price": 1200, "yield": 150, "cost": 50000},
+    "maize": {"price": 2200, "yield": 30, "cost": 15000},
+    "cotton": {"price": 7000, "yield": 8, "cost": 30000},
+    "mango": {"price": 3500, "yield": 50, "cost": 40000},
+    "jute": {"price": 5000, "yield": 12, "cost": 25000},
+    "coffee": {"price": 8000, "yield": 6, "cost": 30000},
+    "coconut": {"price": 2500, "yield": 80, "cost": 35000}
+}
+
+
+def get_market_demand(price):
+    if price >= 5000:
+        return "Very High"
+    elif price >= 3000:
+        return "High"
+    elif price >= 2000:
+        return "Medium"
+    else:
+        return "Low"
+
+
+# ---------------- PREDICT API ----------------
+
 @app.route("/predict", methods=["POST"])
 def predict():
+
     print("Predict API Called")
+
     try:
+
         data = request.get_json()
+        soiltype = data["soiltype"]
+
+# Fix spelling mismatch
+        if soiltype == "Alluvial Soil":
+         soiltype = "Allvial Soil"
+
+        soil_encoded = soil_encoder.transform(
+    [soiltype]
+)[0]
 
         print("Received Data:", data)
 
-        N = float(data.get("N"))
-        P = float(data.get("P"))
-        K = float(data.get("K"))
+        # Input values
+        N = float(data["N"])
+        P = float(data["P"])
+        K = float(data["K"])
+        ph = float(data["ph"])
+
+        # Validation
+        if N <= 0 or N > 140:
+            return jsonify({"error": "Invalid N value"}), 400
+
+        if P <= 0 or P > 145:
+            return jsonify({"error": "Invalid P value"}), 400
+
+        if K <= 0 or K > 205:
+            return jsonify({"error": "Invalid K value"}), 400
+
+        if ph < 3.5 or ph > 10:
+            return jsonify({"error": "Invalid pH value"}), 400
+
         temperature = float(data.get("temperature"))
         humidity = float(data.get("humidity"))
-        ph = float(data.get("ph"))
         rainfall = float(data.get("rainfall"))
 
         print("----------- INPUTS -----------")
@@ -110,119 +282,175 @@ def predict():
         print("pH:", ph)
         print("Rainfall:", rainfall)
         print("------------------------------")
-        # Get probabilities
-        probs = model.predict_proba(
-            [[N, P, K, temperature, humidity, ph, rainfall]]
-        )[0]
+
+        # Prediction probabilities
+        probs = model.predict_proba([[
+    soil_encoded,
+    N,
+    P,
+    K,
+    temperature,
+    humidity,
+    ph,
+    rainfall
+]])[0]
 
         classes = model.classes_
 
+        # Top 3 predictions
         top3 = sorted(
             zip(classes, probs),
             key=lambda x: x[1],
             reverse=True
         )[:3]
 
-        crop = top3[0][0]
+        print("TOP 3:", top3)
+
+        # Best crop
+        crop = str(top3[0][0]).lower()
+
+        # Market Data
+        if crop in crop_market_data:
+
+            market_price = crop_market_data[crop]["price"]
+            yield_per_acre = crop_market_data[crop]["yield"]
+            cultivation_cost = crop_market_data[crop]["cost"]
+
+            revenue = market_price * yield_per_acre
+            profit = revenue - cultivation_cost
+
+            market_demand = get_market_demand(market_price)
+
+        else:
+
+            market_price = 2000
+            profit = 15000
+            market_demand = "Medium"
 
         # Save prediction
         try:
+
             cursor.execute(
                 """
                 INSERT INTO predictions
                 (farmer_name, ph, temperature, crop)
                 VALUES (%s, %s, %s, %s)
                 """,
-                ("Farmer", ph, temperature, crop)
+                (
+                    "Farmer",
+                    ph,
+                    temperature,
+                    crop
+                )
             )
+
             db.commit()
+
         except Exception as db_error:
             print("Database Error:", db_error)
 
-        return jsonify({
-            "success": True,
-            "recommended_crop": crop,
-            "confidence": round(float(top3[0][1]) * 100, 2),
-            "top3": [
+        # Top 3 JSON
+        top3_result = []
+
+        for item in top3:
+
+            top3_result.append(
                 {
-                    "crop": c,
-                    "confidence": round(float(p) * 100, 2)
+                    "crop": str(item[0]),
+                    "confidence": round(float(item[1]) * 100, 2)
                 }
-                for c, p in top3
-            ]
-        })
+            )
+
+        # Final response
+        response = {
+
+            "success": True,
+
+            "recommended_crop": crop.title(),
+
+            "confidence": round(
+                float(top3[0][1]) * 100,
+                2
+            ),
+
+            "top3": top3_result,
+
+            "market_price": market_price,
+
+            "market_demand": market_demand,
+
+            "profit": round(profit, 2)
+        }
+
+        print("FINAL RESPONSE:", response)
+
+        return jsonify(response)
 
     except Exception as e:
+
         print("Prediction Error:", e)
+
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
+from geopy.geocoders import Nominatim
+from flask import request, jsonify
+
 @app.route('/current-location', methods=['POST'])
 def current_location():
+    print("🔥 /current-location API HIT")
     try:
         data = request.get_json()
+        print(data)
 
-        latitude = data["latitude"]
-        longitude = data["longitude"]
+        latitude = float(data["latitude"])
+        longitude = float(data["longitude"])
 
-        geolocator = Nominatim(
-            user_agent="agri_ai"
-        )
+        API_KEY = "7abcbdcba55e4de680f1281e273bf101"
 
-        language = data.get("language", "en")
+        url = "https://api.geoapify.com/v1/geocode/reverse"
 
-        location = geolocator.reverse(
-            f"{latitude}, {longitude}",
-            language=language
-        )
-
-        address = location.raw["address"]
-
-        city = (
-            address.get("city")
-            or address.get("town")
-            or address.get("village")
-            or address.get("suburb")
-            or address.get("county")
-            or address.get("state")
-        )
-
-        translations = {
-            "Ittagalpura": {
-                "te": "ఇట్టగల్పుర",
-                "hi": "इट्टागलपुरा",
-                "ta": "இட்டகல்புரா"
-            },
-            "Bangalore": {
-                "te": "బెంగళూరు",
-                "hi": "बेंगलुरु",
-                "ta": "பெங்களூரு"
-            },
-            "Hyderabad": {
-                "te": "హైదరాబాద్",
-                "hi": "हैदराबाद",
-                "ta": "ஹைதராபாத்"
-            }
+        params = {
+            "lat": latitude,
+            "lon": longitude,
+            "apiKey": API_KEY
         }
 
-        if city in translations and language != "en":
-            city = translations[city].get(
-                language,
-                city
-            )
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+
+        result = response.json()
+        print("Latitude:", latitude)
+        print("Longitude:", longitude)
+        print(result)
+
+        if len(result["features"]) == 0:
+            return jsonify({
+                "success": False,
+                "error": "Location not found"
+            })
+
+        props = result["features"][0]["properties"]
 
         return jsonify({
-            "city": city
+            "success": True,
+            "village": props.get("village", ""),
+            "city": props.get("city", ""),
+            "mandal": props.get("county", ""),
+            "district": props.get("state_district", ""),
+            "state": props.get("state", ""),
+            "postcode": props.get("postcode", ""),
+            "road": props.get("street", ""),
+            "latitude": latitude,
+            "longitude": longitude
         })
 
     except Exception as e:
-        print(e)
         return jsonify({
+            "success": False,
             "error": str(e)
         }), 500
-
-    
 @app.route("/register-machine", methods=["POST"])
 def register_machine():
     try:
@@ -340,36 +568,38 @@ def update_machine_status(id):
             "error": str(e)
         }), 500
         
-@app.route("/delete-machine/<int:id>", methods=["DELETE"])
-def delete_machine(id):
+@app.route("/detect-disease", methods=["POST"])
+def detect_disease():
+
+    if "image" not in request.files:
+        return jsonify({
+            "success": False,
+            "message": "No image uploaded"
+        })
+
+    image = request.files["image"]
+
+    os.makedirs("uploads", exist_ok=True)
+
+    image_path = "uploads/temp.jpg"
+
+    image.save(image_path)
+
     try:
-        data = request.get_json()
 
-        pin = data.get("pin")
-
-        cursor.execute(
-            "DELETE FROM farm_machines WHERE id=%s AND pin=%s",
-            (id, pin)
-        )
-
-        db.commit()
-
-        if cursor.rowcount == 0:
-            return jsonify({
-                "success": False,
-                "message": "Invalid PIN"
-            }), 403
+        analysis = ask_gemini(image_path)
 
         return jsonify({
             "success": True,
-            "message": "Machine deleted successfully"
+            "analysis": analysis
         })
 
     except Exception as e:
+
         return jsonify({
             "success": False,
-            "error": str(e)
-        }), 500
+            "message": str(e)
+        })
 @app.route("/my-machines", methods=["POST"])
 def my_machines():
     try:
@@ -413,88 +643,9 @@ def my_machines():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-@app.route("/detect-disease", methods=["POST"])
-def detect_disease():
 
-    if "image" not in request.files:
-        return jsonify({
-            "success": False,
-            "message": "Please upload a leaf image."
-        }), 400
 
-    file = request.files["image"]
 
-    if file.filename == "":
-        return jsonify({
-            "success": False,
-            "message": "Please upload a leaf image."
-        }), 400
-
-    try:
-
-        # Load image
-        img = Image.open(file.stream).convert("RGB")
-        img = img.resize((224, 224))
-
-        img_array = np.array(img) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
-
-        # Predict
-        prediction = disease_model.predict(img_array)
-
-        class_index = np.argmax(prediction)
-
-        confidence = float(np.max(prediction)) * 100
-
-        predicted_class = class_names[class_index]
-
-        # Example:
-        # Tomato___Late_blight
-
-        parts = predicted_class.split("___")
-
-        crop = parts[0].replace("_", " ")
-
-        disease = parts[1].replace("_", " ")
-
-        # Temporary medicine
-
-        medicine = "Consult Agricultural Officer"
-
-        dosage = "As recommended"
-
-        prevention = "Maintain healthy crop management."
-
-        return jsonify({
-
-            "success": True,
-
-            "crop": crop,
-
-            "disease": disease,
-
-            "confidence": round(confidence,2),
-
-            "medicine": medicine,
-
-            "dosage": dosage,
-
-            "prevention": prevention
-
-        })
-
-    except Exception as e:
-
-        return jsonify({
-
-            "success": False,
-
-            "message": str(e)
-
-        }),500
-        
-from flask import jsonify, request
 import requests
 
 API_KEY = "579b464db66ec23bdd00000164cf42d3199a404160c7582e0446cc2c"
@@ -588,7 +739,139 @@ def translate():
             "success": False,
             "error": str(e)
         })
+        
+def crop_recommendation_tool():
+    return {
+        "tool": "crop_recommendation",
+        "message": "Sure! I can recommend the best crop. Please provide your location and soil type."
+    }
+
+
+def disease_detection_tool():
+    return {
+        "tool": "disease_detection",
+        "message": "Please upload a clear image of the affected leaf for disease analysis."
+    }
+
+
+def weather_tool():
+    return {
+        "tool": "weather",
+        "message": "Please share your location so I can check the latest weather forecast."
+    }
+
+
+def market_price_tool():
+    return {
+        "tool": "market_price",
+        "message": "Please tell me the crop name to check today's market price."
+    }
+@app.route("/chat", methods=["POST"])
+def chat():
+    try:
+        data = request.get_json()
+
+        message = data.get("message", "").strip()
+        session_id = data.get("session_id", "default")
+
+        print("User:", message)
+
+        chat = get_chat(session_id)
+
+        response = chat.send_message(message)
+
+        print("Gemini:", response.text)
+
+        reply = response.text.strip()
+
+        return jsonify({
+            "success": True,
+            "type": "chat",
+            "reply": reply
+        })
+
+    except Exception as e:
+        print("Chat Error:", e)
+        return jsonify({
+            "success": False,
+            "type": "chat",
+            "reply": str(e)
+        }), 500 
+         
+@app.route("/test")
+def test():
+    try:
+        response = gemini_model.generate_content("Hello")
+        return response.text
+    except Exception as e:
+        return str(e)
+    
+@app.route("/farmgpt", methods=["POST"])
+def farmgpt():
+    try:
+        data = request.get_json()
+
+        print("Received:", data)
+
+        message = data.get("message", "")
+
+        answer = farm_chat(message)
+
+        return jsonify({
+            "reply": answer
+        })
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({
+            "reply": f"Server Error: {str(e)}"
+        }), 500
+
+from flask import jsonify
+
+@app.route("/notifications")
+def notifications():
+
+    notifications = [
+        "🌧 Heavy rain expected tomorrow in Bangalore",
+        "📈 Rice market price increased by ₹120",
+        "🏛 PM-KISAN installment released"
+    ]
+
+    return jsonify(notifications)
+@app.route("/delete-machine/<int:id>", methods=["DELETE"])
+def delete_machine(id):
+    try:
+        print("Deleting machine ID:", id)
+
+        cursor.execute("""
+            DELETE FROM farm_machines
+            WHERE id=%s
+        """, (id,))
+
+        db.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Machine deleted successfully"
+        })
+
+    except Exception as e:
+        print("Delete Machine Error:", e)
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 if __name__ == "__main__":
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )
+if __name__ == "__main__":
+    print("Starting Flask Server...")
     app.run(
         host="0.0.0.0",
         port=5000,
