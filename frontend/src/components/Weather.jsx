@@ -21,18 +21,32 @@ const getWeather = async () => {
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`
     );
 
-    setWeather({
+    const nextWeather = {
       city: response.data.name,
       temperature: response.data.main.temp,
       humidity: response.data.main.humidity,
       wind: response.data.wind.speed,
       condition: response.data.weather[0].main,
-    });
+    };
+    setWeather(nextWeather);
+    saveWeatherAlert(nextWeather);
 
   } catch (error) {
     alert("City not found");
     console.error(error);
   }
+};
+
+const saveWeatherAlert = (currentWeather) => {
+  const user = JSON.parse(localStorage.getItem("agri_user") || "null");
+  if (!user?.weatherAlerts) return;
+  let message = "";
+  if (String(currentWeather.condition).toLowerCase().includes("rain") || currentWeather.humidity >= 85) message = `Heavy-rain risk near ${currentWeather.city}. Avoid spraying pesticides and ensure field drainage.`;
+  else if (currentWeather.temperature >= 38) message = `High-temperature alert for ${currentWeather.city}. Irrigate during cooler hours and monitor crop stress.`;
+  else if (currentWeather.wind >= 25) message = `Strong-wind alert for ${currentWeather.city}. Secure supports and postpone spraying.`;
+  if (!message) return;
+  const alerts = JSON.parse(localStorage.getItem("agri_weather_alerts") || "[]");
+  localStorage.setItem("agri_weather_alerts", JSON.stringify([{ phone: user.phone, message, createdAt: new Date().toLocaleString() }, ...alerts].slice(0, 20)));
 };
 
 const getCurrentLocationWeather = () => {
@@ -66,13 +80,15 @@ const getCurrentLocationWeather = () => {
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
         );
 
-        setWeather({
+        const nextWeather = {
           city: locationName,
           temperature: weatherResponse.data.main.temp,
           humidity: weatherResponse.data.main.humidity,
           wind: weatherResponse.data.wind.speed,
           condition: weatherResponse.data.weather[0].main,
-        });
+        };
+        setWeather(nextWeather);
+        saveWeatherAlert(nextWeather);
 
       } catch (error) {
         console.log(error);

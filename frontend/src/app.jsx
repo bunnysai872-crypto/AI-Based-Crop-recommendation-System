@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import { useTranslation } from "react-i18next";
+import { translateText } from "./utils/translate";
 import FarmMachines from "./components/FarmMachines";
 import MyMachines from "./components/MyMachines";
 
@@ -18,6 +19,8 @@ import GovtSchemes from "./components/GovtSchemes";
 import Notifications from "./components/Notifications";
 import Chatbot from "./components/Chatbot";
 import LandingPage from "./components/LandingPage";
+import Login from "./components/Login";
+import Register from "./components/Register";
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -32,7 +35,8 @@ function App() {
   alert(translated);
 };
  const [language, setLanguage] = useState(i18n.language);
-  const [loggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(() => Boolean(localStorage.getItem("agri_user")));
+  const [authMode, setAuthMode] = useState("login");
   const [page, setPage] = useState("crop");
 
  const [soilType, setSoilType] = useState("");
@@ -57,6 +61,14 @@ const [locationMode, setLocationMode] = useState("current");
     <LandingPage
       onStart={() => setShowLanding(false)}
     />
+  );
+}
+
+if (!loggedIn) {
+  return authMode === "register" ? (
+    <Register onBack={() => setAuthMode("login")} onRegistered={() => setAuthMode("login")} />
+  ) : (
+    <Login onLogin={() => setLoggedIn(true)} onRegister={() => setAuthMode("register")} />
   );
 }
 
@@ -578,6 +590,8 @@ const details =
   translatedName: translatedCrop,
 
   confidence: confidence,
+  modelAccuracy: response.data.model_accuracy,
+  modelAlgorithm: response.data.model_algorithm,
 
  top3: await Promise.all(
   top3.map(async (item) => ({
@@ -1090,6 +1104,11 @@ precautions:
 <p>
   🤖 {t("confidence")}: {cropInfo.confidence}%
 </p>
+{cropInfo.modelAccuracy && (
+  <p>
+    📊 Model accuracy: {cropInfo.modelAccuracy}% {cropInfo.modelAlgorithm ? `(${cropInfo.modelAlgorithm})` : ""}
+  </p>
+)}
 
 <h3>
   🌾 {t("top3Recommendations")}

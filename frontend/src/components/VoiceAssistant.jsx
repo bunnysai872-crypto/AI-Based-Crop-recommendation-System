@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function VoiceAssistant({ setPage }) {
   const { t, i18n } = useTranslation();
 
   const [text, setText] = useState("");
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
 
   const startListening = () => {
     const SpeechRecognition =
@@ -25,6 +27,7 @@ function VoiceAssistant({ setPage }) {
     }
 
     const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
 
     recognition.lang =
       i18n.language === "te"
@@ -35,6 +38,8 @@ function VoiceAssistant({ setPage }) {
         ? "ta-IN"
         : "en-US";
 
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
     recognition.start();
 
     recognition.onresult = (event) => {
@@ -238,6 +243,12 @@ function VoiceAssistant({ setPage }) {
     };
   };
 
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    window.speechSynthesis?.cancel();
+    setListening(false);
+  };
+
   return (
     <div>
       <h2>
@@ -254,7 +265,11 @@ function VoiceAssistant({ setPage }) {
           ? "बोलना शुरू करें"
           : i18n.language === "ta"
           ? "பேச தொடங்கவும்"
-          : "Start Speaking"}
+          : listening ? "Listening…" : "Start Speaking"}
+      </button>
+
+      <button onClick={stopListening} style={{ ...buttonStyle, background: "#b54434", marginTop: "10px" }}>
+        Stop Voice
       </button>
 
       {text && (

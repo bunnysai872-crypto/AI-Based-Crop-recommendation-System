@@ -1,0 +1,14 @@
+.market-prices { max-width: 1050px; margin: 0 auto; color: #173b20; }
+.market-prices__intro { color: #52715a; margin-bottom: 20px; }
+.market-prices__filters { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px; background: #f3faf2; border: 1px solid #dcecdc; border-radius: 12px; }
+.market-prices__filters select { min-width: 180px; padding: 10px 12px; border: 1px solid #b8d3ba; border-radius: 8px; background: #fff; color: #173b20; }
+.market-prices__filters button { padding: 10px 18px; border: 0; border-radius: 8px; background: #287a39; color: #fff; font-weight: 600; cursor: pointer; }
+.market-prices__filters button:disabled { background: #8cab91; cursor: wait; }
+.market-prices__chart { margin-top: 24px; padding: 18px; background: #fff; border: 1px solid #dcecdc; border-radius: 14px; box-shadow: 0 8px 20px rgba(28, 92, 42, .08); }
+.market-prices__chart h3 { margin-top: 0; color: #1b5e2a; }
+.market-prices__table-wrap { overflow-x: auto; margin-top: 24px; border: 1px solid #dcecdc; border-radius: 12px; }
+.market-prices__table { width: 100%; border-collapse: collapse; background: #fff; }
+.market-prices__table th { background: #e7f4e5; color: #1b5e2a; text-align: left; }
+.market-prices__table th, .market-prices__table td { padding: 12px 14px; border-bottom: 1px solid #e4eee3; }
+.market-prices__table tr:last-child td { border-bottom: 0; }
+@media (max-width: 600px) { .market-prices__filters select, .market-prices__filters button { width: 100%; } .market-prices__chart { padding: 12px; } }

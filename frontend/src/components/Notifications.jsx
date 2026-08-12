@@ -1,7 +1,15 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 function Notifications() {
   const { t, i18n } = useTranslation();
+  const [weatherAlerts, setWeatherAlerts] = useState([]);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("agri_user") || "null");
+    const saved = JSON.parse(localStorage.getItem("agri_weather_alerts") || "[]");
+    setWeatherAlerts(saved.filter((alert) => alert.phone === user?.phone));
+  }, []);
 
   const notifications = {
     en: [
@@ -39,6 +47,13 @@ function Notifications() {
   return (
     <div>
       <h2>🔔 {t("notifications")}</h2>
+
+      {weatherAlerts.map((alert, index) => (
+        <div key={`weather-${index}`} style={{ background: "#fff4e5", padding: "18px", marginTop: "15px", borderRadius: "12px", borderLeft: "5px solid #ff9800" }}>
+          <p style={{ fontSize: "16px", margin: 0 }}>🌦 {alert.message}</p>
+          <small>{alert.createdAt}</small>
+        </div>
+      ))}
 
       {currentNotifications.map((note, index) => (
         <div

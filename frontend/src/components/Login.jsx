@@ -7,6 +7,8 @@ function Login({ onLogin, onRegister }) {
   const { t, i18n } = useTranslation();
 
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
 
@@ -23,8 +25,13 @@ function Login({ onLogin, onRegister }) {
   };
 
   const verifyOtp = () => {
+    const account = JSON.parse(localStorage.getItem("agri_user") || "null");
+    if (!account || account.phone !== phone.replace(/\s|-/g, "") || account.name.trim().toLowerCase() !== name.trim().toLowerCase() || account.password !== password) {
+      alert("Use the registered name, phone number, and password, or create an account first.");
+      return;
+    }
     if (otp.length === 6) {
-      onLogin();
+      onLogin(phone);
 
       // Backend API Verification
       // fetch("http://localhost:5000/verify-otp")
@@ -126,10 +133,26 @@ function Login({ onLogin, onRegister }) {
       </p>
 
       <input
+        type="text"
+        placeholder="Registered Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        style={inputStyle}
+      />
+
+      <input
         type="tel"
         placeholder="Enter Phone Number"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
+        style={inputStyle}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         style={inputStyle}
       />
 

@@ -1,294 +1,50 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import "./Chatbot.css";
 
+const languageNames = { en: "English", hi: "Hindi", te: "Telugu", ta: "Tamil", kn: "Kannada", ml: "Malayalam", mr: "Marathi", gu: "Gujarati", bn: "Bengali", pa: "Punjabi", or: "Odia", as: "Assamese", ur: "Urdu", ne: "Nepali", sa: "Sanskrit", sd: "Sindhi", kok: "Konkani", mai: "Maithili", mni: "Manipuri", doi: "Dogri", brx: "Bodo", sat: "Santali", ks: "Kashmiri" };
+const speechLocales = Object.fromEntries(Object.keys(languageNames).map((code) => [code, `${code}-IN`]));
 
-function Chatbot() {
-  const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text: "👋 Welcome Farmer! Tell me about your farm or use a quick action below.",
-    },
-  ]);
-
+function Chatbot({ language = "en" }) {
+  const [messages, setMessages] = useState([{ sender: "bot", text: "Hello! Ask about crops, disease, fertilizer, weather, or market prices." }]);
   const [input, setInput] = useState("");
-
-  const quickReply = (type) => {
-    let response = "";
-
-    switch (type) {
-      case "crop":
-        response =
-          "🌾 Recommended Crops:\n\nCotton (96%)\nGroundnut (92%)\nMaize (89%)\n\n💰 Profit: ₹2.3 Lakhs\n💧 Water: Medium";
-        break;
-
-      case "weather":
-        response =
-          "🌦 Weather Forecast:\nTemperature: 31°C\nHumidity: 68%\nRainfall: Moderate";
-        break;
-
-      case "water":
-        response =
-          "💧 Water Requirement:\nCurrent soil moisture is sufficient for 3 days.";
-        break;
-
-      case "fertilizer":
-        response =
-          "🌱 Fertilizer Recommendation:\nApply NPK (20:20:20) fertilizer.";
-        break;
-
-      case "market":
-        response =
-          "📈 Market Prices:\nCotton ₹7200/qtl\nRice ₹2400/qtl";
-        break;
-
-      case "scheme":
-        response =
-          "🏛 Government Schemes:\nPM-KISAN\nCrop Insurance\nSolar Pump Subsidy";
-        break;
-
-      default:
-        response = "Please ask another question.";
-    }
-
-    setMessages((prev) => [
-      ...prev,
-      { sender: "user", text: type },
-      { sender: "bot", text: response },
-    ]);
+  const [voiceLanguage, setVoiceLanguage] = useState(language);
+  const [listening, setListening] = useState(false);
+  const recognition = useRef(null);
+  const speak = (text) => {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = speechLocales[voiceLanguage] || "en-IN";
+    window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance);
   };
-
-  const sendMessage = async () => {
-  if (!input.trim()) return;
-
-  const userMessage = input;
-
-  // Show user's message
-  setMessages((prev) => [
-    ...prev,
-    {
-      sender: "user",
-      text: userMessage,
-    },
-  ]);
-
-  setInput("");
-
-  // Show temporary loading message
-  setMessages((prev) => [
-    ...prev,
-    {
-      sender: "bot",
-      text: "⏳ Thinking...",
-    },
-  ]);
-
-  try {
-    const response = await fetch("http://127.0.0.1:5000/farmgpt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: userMessage,
-      }),
-    });
-
-    const data = await response.json();
-
-    // Remove "Thinking..."
-    setMessages((prev) => prev.slice(0, -1));
-
-    let reply = data.reply;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "bot",
-        text: reply,
-      },
-    ]);
-  } catch (error) {
-    setMessages((prev) => prev.slice(0, -1));
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: "bot",
-        text: "❌ Unable to connect to the AI server.",
-      },
-    ]);
-
-    console.log(error);
-  }
-};
-
-  return (
-    <div
-      style={{
-        maxWidth: "500px",
-        margin: "auto",
-        background: "white",
-        borderRadius: "20px",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-        overflow: "hidden",
-      }}
-    >
-      {/* Top */}
-      <div
-        style={{
-          background:
-            "linear-gradient(135deg,#2e7d32,#4caf50)",
-          color: "white",
-          padding: "15px",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <h3>🤖 AgriAI</h3>
-          <small>Online</small>
-        </div>
-
-        <div>
-          🎤 🌐
-        </div>
-      </div>
-
-      {/* Chat */}
-      <div
-        style={{
-          height: "450px",
-          overflowY: "auto",
-          background: "#f6fbf5",
-          padding: "15px",
-        }}
-      >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            style={{
-              background:
-                msg.sender === "bot"
-                  ? "#e8f5e9"
-                  : "#c8e6c9",
-              padding: "12px",
-              borderRadius: "15px",
-              marginBottom: "15px",
-              maxWidth: "75%",
-              marginLeft:
-                msg.sender === "user"
-                  ? "auto"
-                  : "0",
-              whiteSpace: "pre-line",
-            }}
-          >
-            {msg.text}
-          </div>
-        ))}
-
-        {/* Quick Actions */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "10px",
-          }}
-        >
-          <button
-            onClick={() => quickReply("crop")}
-            style={chip}
-          >
-            🌾 Crop
-          </button>
-
-          <button
-            onClick={() => quickReply("weather")}
-            style={chip}
-          >
-            🌦 Weather
-          </button>
-
-          <button
-            onClick={() => quickReply("water")}
-            style={chip}
-          >
-            💧 Water
-          </button>
-
-          <button
-            onClick={() =>
-              quickReply("fertilizer")
-            }
-            style={chip}
-          >
-            🌱 Fertilizer
-          </button>
-
-          <button
-            onClick={() => quickReply("market")}
-            style={chip}
-          >
-            📈 Market
-          </button>
-
-          <button
-            onClick={() => quickReply("scheme")}
-            style={chip}
-          >
-            🏛 Schemes
-          </button>
-        </div>
-      </div>
-
-      {/* Input */}
-      <div
-        style={{
-          display: "flex",
-          padding: "15px",
-          borderTop: "1px solid #ddd",
-        }}
-      >
-        <input
-  value={input}
-  onChange={(e) => setInput(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === "Enter") {
-      sendMessage();
-    }
-  }}
-  placeholder="Ask your farming question..."
-  style={{
-    flex: 1,
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid #ccc",
-  }}
-/>
-
-        <button
-          onClick={sendMessage}
-          style={{
-            marginLeft: "10px",
-            background: "#2e7d32",
-            color: "white",
-            border: "none",
-            borderRadius: "10px",
-            padding: "12px",
-            cursor: "pointer",
-          }}
-        >
-          ➤
-        </button>
-      </div>
-    </div>
-  );
+  const send = async (message = input) => {
+    if (!message.trim()) return;
+    setMessages((current) => [...current, { sender: "user", text: message }, { sender: "bot", text: "Thinking…", pending: true }]);
+    setInput("");
+    try {
+      const response = await fetch("http://127.0.0.1:5000/farmgpt", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }) });
+      const data = await response.json(); const reply = data.reply || "I could not generate a response.";
+      setMessages((current) => [...current.filter((item) => !item.pending), { sender: "bot", text: reply }]); speak(reply);
+    } catch { setMessages((current) => [...current.filter((item) => !item.pending), { sender: "bot", text: "Unable to connect to the AI service." }]); }
+  };
+  const startListening = () => {
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) return alert("Voice input is supported in Chrome and compatible browsers.");
+    recognition.current = new Recognition(); recognition.current.lang = speechLocales[voiceLanguage] || "en-IN"; recognition.current.interimResults = false;
+    recognition.current.onstart = () => setListening(true);
+    recognition.current.onend = () => setListening(false);
+    recognition.current.onresult = (event) => { const text = event.results[0][0].transcript; setInput(text); };
+    recognition.current.start();
+  };
+  const stopVoice = () => {
+    recognition.current?.stop();
+    window.speechSynthesis?.cancel();
+    setListening(false);
+  };
+  return <div className="agri-chatbot">
+    <h2>🤖 AgriAI voice chatbot</h2><p>Voice input and spoken answers support the listed Indian regional languages when available in your browser.</p>
+    <label>Chat language <select value={voiceLanguage} onChange={(e) => setVoiceLanguage(e.target.value)}>{Object.entries(languageNames).map(([code, name]) => <option value={code} key={code}>{name}</option>)}</select></label>
+    <div className="agri-chatbot__messages">{messages.map((message, index) => <div key={index} className={`agri-chatbot__message agri-chatbot__message--${message.sender}`}>{message.text}</div>)}</div>
+    <div className="agri-chatbot__controls"><input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="Ask your farming question…" /><button onClick={startListening}>{listening ? "Listening…" : "🎙 Speak"}</button><button onClick={stopVoice} className="agri-chatbot__stop">Stop voice</button><button onClick={() => send()}>Send</button></div>
+  </div>;
 }
-
-const chip = {
-  background: "#dcedc8",
-  border: "none",
-  borderRadius: "20px",
-  padding: "10px 15px",
-  cursor: "pointer",
-};
-
 export default Chatbot;

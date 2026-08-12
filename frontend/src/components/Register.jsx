@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import farmBg from "../assets/farm-bg.jpg";
 
-function Register({ onBack }) {
+function Register({ onBack, onRegistered }) {
   const { t } = useTranslation();
 
   const [name, setName] = useState("");
@@ -16,8 +16,13 @@ function Register({ onBack }) {
       return;
     }
 
-    alert("Registration Successful!");
-    onBack();
+    if (!/^\d{10}$/.test(phone.replace(/\s|-/g, ""))) {
+      alert("Enter a valid 10-digit phone number");
+      return;
+    }
+    localStorage.setItem("agri_user", JSON.stringify({ name, email, phone: phone.replace(/\s|-/g, ""), password, weatherAlerts: true }));
+    alert("Registration successful. Use this registered phone number to log in and receive in-app weather alerts.");
+    onRegistered?.();
   };
 
   return (
